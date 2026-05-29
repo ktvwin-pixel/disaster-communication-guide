@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#06172e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="재난소통 가이드">
   <link rel="manifest" href="manifest.webmanifest">
@@ -14,25 +14,29 @@
   <title>재난안전 커뮤니케이션 전략 가이드</title>
   <style>
     :root {
-      --ink: #1e293b;
-      --muted: #64748b;
-      --line: #d8dee8;
-      --panel: #ffffff;
-      --soft: #f4f6fa;
-      --accent: #1e293b;
+      --ink: #edf4ff;
+      --muted: #a8b7cf;
+      --line: #263a56;
+      --panel: #0e2038;
+      --panel-2: #122946;
+      --soft: #06172e;
+      --accent: #0a1b33;
       --accent-2: #d97706;
-      --accent-3: #0d9488;
-      --danger: #b42318;
-      --ok: #197a43;
+      --accent-3: #22c55e;
+      --danger: #ef4444;
+      --ok: #22c55e;
+      --report: #94a3b8;
       --warn: #b76e00;
-      --focus: #0b5fff;
-      --shadow: 0 18px 45px rgba(30, 41, 59, .08);
+      --focus: #60a5fa;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .28);
     }
 
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--soft);
+      background:
+        radial-gradient(circle at top left, rgba(30, 64, 120, .38), transparent 34rem),
+        linear-gradient(135deg, #06172e 0%, #0a1f3a 48%, #07111f 100%);
       color: var(--ink);
       font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
       line-height: 1.55;
@@ -42,14 +46,14 @@
     button, input, textarea, select { font: inherit; }
     button {
       border: 1px solid var(--line);
-      background: var(--panel);
+      background: #132b49;
       color: var(--ink);
       min-height: 40px;
       border-radius: 6px;
       padding: 0 12px;
       cursor: pointer;
     }
-    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button.primary { background: #081a31; color: #fff; border-color: #3b557a; }
     button.ghost { background: transparent; }
     button:focus, input:focus, textarea:focus, select:focus {
       outline: 3px solid rgba(11, 95, 255, .18);
@@ -63,7 +67,7 @@
     }
 
     aside {
-      background: #fff;
+      background: rgba(8, 24, 46, .96);
       border-right: 1px solid var(--line);
       padding: 18px;
       position: sticky;
@@ -89,6 +93,9 @@
       height: auto;
       display: block;
       flex: 0 0 auto;
+      border: 1px solid rgba(148, 163, 184, .35);
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .22);
     }
     h1, h2, h3 { margin: 0; }
     h1 {
@@ -116,7 +123,7 @@
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fff;
+      background: #07172b;
       color: var(--ink);
       padding: 9px 10px;
     }
@@ -137,9 +144,9 @@
       flex-wrap: wrap;
     }
     .tab[aria-selected="true"] {
-      background: var(--ink);
+      background: #0f2f56;
       color: #fff;
-      border-color: var(--ink);
+      border-color: #4b668f;
     }
 
     .workspace {
@@ -150,7 +157,7 @@
     }
 
     .output {
-      background: #fff;
+      background: rgba(10, 27, 51, .96);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
@@ -163,7 +170,7 @@
       align-items: center;
       padding: 16px 18px;
       border-bottom: 1px solid var(--line);
-      background: #fbfcfe;
+      background: #0b1f3a;
     }
     .status {
       display: inline-flex;
@@ -189,11 +196,11 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
-      background: #fff;
+      background: #0f223b;
       cursor: pointer;
       min-height: 92px;
     }
-    .phase.active { border-color: var(--accent); box-shadow: inset 0 0 0 2px rgba(30, 41, 59, .12); }
+    .phase.active { border-color: #60a5fa; box-shadow: inset 0 0 0 2px rgba(96, 165, 250, .18); background: #102d52; }
     .phase strong { display: block; font-size: 13px; }
     .phase span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
 
@@ -206,10 +213,10 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
-      background: #fff;
+      background: #0f223b;
     }
     .check input { width: 20px; height: 20px; margin: 2px 0 0; }
-    .check.done { background: #f2faf6; border-color: #b9e4cc; }
+    .check.done { background: rgba(34, 197, 94, .13); border-color: rgba(34, 197, 94, .55); }
     .tag {
       display: inline-block;
       border-radius: 999px;
@@ -219,19 +226,44 @@
       color: var(--muted);
       white-space: nowrap;
     }
-    .tag.red { color: var(--danger); border-color: #f0c2bd; background: #fff5f4; }
-    .tag.gold { color: var(--accent-2); border-color: #ecd4b7; background: #fff8ed; }
-    .tag.green { color: var(--ok); border-color: #bfe3cf; background: #f3fbf7; }
+    .tag.red { color: #fecaca; border-color: rgba(239, 68, 68, .62); background: rgba(127, 29, 29, .42); }
+    .tag.gold { color: #e2e8f0; border-color: rgba(148, 163, 184, .58); background: rgba(71, 85, 105, .33); }
+    .tag.green { color: #bbf7d0; border-color: rgba(34, 197, 94, .58); background: rgba(20, 83, 45, .38); }
 
     .script-box {
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 12px;
-      background: #fbfcfe;
+      background: #0f223b;
       margin-bottom: 10px;
     }
     .script-box p { margin: 4px 0 0; }
     .script-box .caption { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .script-box.tone-media,
+    .matrix-card.tone-media {
+      background: rgba(20, 83, 45, .34);
+      border-color: rgba(34, 197, 94, .72);
+      box-shadow: inset 4px 0 0 rgba(34, 197, 94, .86);
+    }
+    .script-box.tone-media .caption,
+    .matrix-card.tone-media h3 { color: #86efac; }
+    .script-box.tone-victim,
+    .matrix-card.tone-victim {
+      background: rgba(127, 29, 29, .34);
+      border-color: rgba(239, 68, 68, .72);
+      box-shadow: inset 4px 0 0 rgba(239, 68, 68, .9);
+    }
+    .script-box.tone-victim .caption,
+    .matrix-card.tone-victim h3 { color: #fca5a5; }
+    .script-box.tone-report,
+    .matrix-card.tone-report,
+    .check.tone-report {
+      background: rgba(51, 65, 85, .42);
+      border-color: rgba(148, 163, 184, .66);
+      box-shadow: inset 4px 0 0 rgba(148, 163, 184, .82);
+    }
+    .script-box.tone-report .caption,
+    .matrix-card.tone-report h3 { color: #cbd5e1; }
 
     .matrix {
       display: grid;
@@ -242,7 +274,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 12px;
-      background: #fff;
+      background: #0f223b;
     }
     .matrix-card ul { margin: 6px 0 0; padding-left: 18px; }
 
@@ -275,9 +307,9 @@
     .print-note {
       border: 1px solid #c9d8df;
       border-radius: 8px;
-      background: #f8fafc;
+      background: rgba(51, 65, 85, .38);
       padding: 10px;
-      color: #334155;
+      color: #dbeafe;
       font-size: 13px;
     }
 
@@ -294,6 +326,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, .96);
+      color: #0f172a;
       box-shadow: var(--shadow);
     }
 
@@ -647,7 +680,7 @@
         <h2>Ⅰ. ${phaseTitle(s.phase)} 체크리스트</h2>
         <div class="checklist">
           ${items.map((item, i) => `
-            <label class="check">
+            <label class="check ${item[2] === "기록" ? "tone-report" : ""}">
               <input type="checkbox" data-check="${i}">
               <span><strong>${i + 1}. ${item[0]}</strong><br>${item[1]}</span>
               <span class="tag ${item[2] === "엄격" ? "red" : item[2] === "기록" ? "gold" : "green"}">${item[2]}</span>
@@ -660,8 +693,8 @@
       });
     }
 
-    function sentenceList(title, arr) {
-      return `<div class="script-box"><div class="caption">${title}</div><p>${arr.map(v => `ㆍ ${v}`).join("<br>")}</p></div>`;
+    function sentenceList(title, arr, tone = "tone-report") {
+      return `<div class="script-box ${tone}"><div class="caption">${title}</div><p>${arr.map(v => `ㆍ ${v}`).join("<br>")}</p></div>`;
     }
 
     function renderScripts(s) {
@@ -677,15 +710,17 @@
         ["오정보·루머", `"현재 온라인에 확산 중인 내용은 공식 확인된 정보가 아닙니다. 혼선을 줄이기 위해 ${s.org} 공식 채널의 안내를 기준으로 확인해 주시고, 새로 확인되는 내용은 같은 채널에서 업데이트하겠습니다."`]
       ];
 
-      $("scripts").innerHTML = scripts.map(([title, body]) => `
-        <div class="script-box"><div class="caption">${title}</div><p>${body}</p></div>
+      const scriptTones = ["tone-report", "tone-victim", "tone-media", "tone-media", "tone-media"];
+      $("scripts").innerHTML = scripts.map(([title, body], index) => `
+        <div class="script-box ${scriptTones[index] || ""}"><div class="caption">${title}</div><p>${body}</p></div>
       `).join("");
 
+      const messageTones = ["tone-report", "tone-report", "tone-media"];
       $("messages").innerHTML = [
         ["주민 안전문자", `"${s.incident.name} 관련 안전조치가 진행 중입니다. 확인된 사실: ${confirmed}. 위험구역 접근을 피하고 공식 안내를 따라 주십시오. 다음 안내: ${next}."`],
         ["내부 공지", `"현재 ${s.incident.name} 상황으로 관련 문의는 지정 창구로 이관합니다. 확인되지 않은 정보의 외부 전달과 SNS 게시를 금지합니다. 변경 사항은 ${next}에 공지합니다."`],
         ["언론 회신 문자", `"문의 주신 사항은 접수했습니다. ${s.org}는 확인된 사실과 공개 가능한 범위를 정리해 공식 창구로 안내드리겠습니다. 원인·책임·최종 수치는 확인 전 단정하지 않습니다."`]
-      ].map(([title, body]) => `<div class="script-box"><div class="caption">${title}</div><p>${body}</p></div>`).join("");
+      ].map(([title, body], index) => `<div class="script-box ${messageTones[index] || ""}"><div class="caption">${title}</div><p>${body}</p></div>`).join("");
     }
 
     function renderRange(s) {
@@ -695,8 +730,9 @@
         ["피해지역 주민", ["대피·통제·복구·생활지원 정보", "위험 회피 행동요령", "비공개: 취약시설 세부, 보안·수사 정보"]],
         ["내부 구성원", ["임무, 보고선, 금지선, 승인선", "콜센터·현장 공통 답변", "비공개: 업무상 알게 된 개인정보의 외부 전달"]]
       ];
-      $("rangeMatrix").innerHTML = cards.map(([title, items]) => `
-        <div class="matrix-card">
+      const cardTones = ["tone-media", "tone-victim", "", "tone-report"];
+      $("rangeMatrix").innerHTML = cards.map(([title, items], index) => `
+        <div class="matrix-card ${cardTones[index] || ""}">
           <h3>${title}</h3>
           <ul>${items.map(v => `<li>${v}</li>`).join("")}</ul>
         </div>
