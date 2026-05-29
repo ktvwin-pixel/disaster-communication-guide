@@ -1,0 +1,18 @@
+{
+  "name": "재난안전 커뮤니케이션 전략 가이드",
+  "short_name": "재난소통",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#126f7a",
+  "description": "재난안전 대응 과정에서 확인 사실 중심의 커뮤니케이션 체크리스트, 스크립트, 문자메시지, 공개범위를 제공하는 웹 앱입니다.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
