@@ -4,12 +4,12 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fb",
-  "theme_color": "#126f7a",
+  "background_color": "#f4f6fa",
+  "theme_color": "#1e293b",
   "description": "재난안전 대응 과정에서 확인 사실 중심의 커뮤니케이션 체크리스트, 스크립트, 문자메시지, 공개범위를 제공하는 웹 앱입니다.",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

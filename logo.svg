@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 210" role="img" aria-labelledby="title desc">
+  <title id="title">KOREA CONTENTS LAB</title>
+  <desc id="desc">Navy and gold KCL wordmark logo</desc>
+  <rect width="780" height="210" rx="28" fill="#1e293b"/>
+  <g transform="translate(34 34)">
+    <rect width="142" height="142" rx="24" fill="#f8fafc"/>
+    <path d="M71 20 29 38v40c0 37 27 65 42 74 15-9 42-37 42-74V38L71 20Z" fill="#1e293b"/>
+    <path d="M49 68h44v13H49V68Zm15-15h13v44H64V53Z" fill="#d97706"/>
+  </g>
+  <text x="205" y="92" fill="#ffffff" font-family="Outfit, Arial, sans-serif" font-size="52" font-weight="800" letter-spacing="0">KOREA</text>
+  <text x="205" y="144" fill="#d97706" font-family="Outfit, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="1">CONTENTS LAB</text>
+  <path d="M204 166h500" stroke="#94a3b8" stroke-width="2" opacity=".55"/>
+</svg>
