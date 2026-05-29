@@ -1,4 +1,4 @@
-const CACHE_NAME = "disaster-comm-guide-v7";
+const CACHE_NAME = "disaster-comm-guide-v8";
 const ASSETS = [
   "./",
   "./index.html",
