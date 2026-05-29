@@ -301,6 +301,48 @@
     }
     .source a { color: var(--accent-3); }
 
+    .timeline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .timeline-list {
+      display: grid;
+      gap: 12px;
+    }
+    .timeline-item {
+      border: 1px solid rgba(148, 163, 184, .62);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(15, 34, 59, .92);
+      box-shadow: inset 4px 0 0 rgba(253, 224, 71, .85);
+    }
+    .timeline-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .timeline-item h3 {
+      margin-bottom: 4px;
+    }
+    .timeline-item pre {
+      white-space: pre-wrap;
+      word-break: keep-all;
+      margin: 10px 0 0;
+      color: var(--ink);
+      font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .timeline-empty {
+      border: 1px dashed rgba(148, 163, 184, .65);
+      border-radius: 8px;
+      padding: 18px;
+      color: var(--muted);
+      background: rgba(15, 34, 59, .52);
+    }
+
     .byline {
       margin-top: 18px;
       padding-top: 12px;
@@ -465,6 +507,7 @@
           <button class="tab" data-view="guide" aria-selected="true">실시간 가이드</button>
           <button class="tab" data-view="range" aria-selected="false">공개범위</button>
           <button class="tab" data-view="sources" aria-selected="false">근거</button>
+          <button class="tab" data-view="timeline" aria-selected="false">타임라인</button>
         </div>
         <div class="actions">
           <button id="copyBtn">복사</button>
@@ -486,9 +529,11 @@
             <div id="guideView">
               <div class="phase-grid" id="phaseGrid"></div>
               <div id="checklist"></div>
-              <h2 style="margin-top:18px;">Ⅱ. 대응 스크립트</h2>
+              <h2 style="margin-top:18px;">Ⅱ. 답변 재점검</h2>
+              <div id="auditPanel"></div>
+              <h2 style="margin-top:18px;">Ⅲ. 대응 스크립트</h2>
               <div id="scripts"></div>
-              <h2 style="margin-top:18px;">Ⅲ. 문자메시지</h2>
+              <h2 style="margin-top:18px;">Ⅳ. 문자메시지</h2>
               <div id="messages"></div>
             </div>
 
@@ -500,6 +545,17 @@
             <div id="sourcesView" class="hidden">
               <h2>Ⅰ. 근거와 적용 원칙</h2>
               <div id="sourceList"></div>
+            </div>
+
+            <div id="timelineView" class="hidden">
+              <h2>Ⅰ. 답변 변화 타임라인</h2>
+              <div class="timeline-actions">
+                <button id="copyTimelineBtn">전체 복사</button>
+                <button id="sendTimelineBtn">전체 전송</button>
+                <button id="printTimelineBtn">타임라인 출력</button>
+                <button id="clearTimelineBtn">기록 초기화</button>
+              </div>
+              <div id="timelineList" class="timeline-list"></div>
             </div>
             <div class="byline">KOREA CONTENTS LAB</div>
           </div>
@@ -705,30 +761,94 @@
       return `<div class="script-box ${tone}"><div class="caption">${title}</div><p>${arr.map(v => `ㆍ ${v}`).join("<br>")}</p></div>`;
     }
 
-    function renderScripts(s) {
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function collectScripts(s) {
       const confirmed = s.confirmed.slice(0, 3).join(", ");
       const unknown = s.unknown.slice(0, 3).join(", ");
       const next = s.phase === "0-2" ? "30분 이내" : s.phase === "2-6" ? "2시간 이내" : s.phase === "6-24" ? "정해진 브리핑 시각" : "다음 정례 안내 시각";
 
-      const scripts = [
+      return [
         ["첫 응대", `"현재 ${s.incident.name} 상황에 대해 ${s.org}가 ${s.incident.agency} 절차로 사실관계를 확인하고 있습니다. 확인된 내용은 ${confirmed}입니다. 추가 확인이 필요한 사항은 ${next}에 공식 경로로 안내드리겠습니다."`],
         ["피해자·가족", `"먼저 피해를 입으신 분들과 가족분들께 깊은 위로의 말씀을 드립니다. 지금은 '생명 보호와 현장 수습'을 최우선으로 조치하고 있으며, 개인정보와 가족 연락 절차를 보호하면서 확인된 범위 안에서 안내드리겠습니다."`],
         ["언론", `"확인된 사실만 말씀드리겠습니다. 현재 우선순위는 ${s.incident.priority}입니다. ${unknown}은 확인 또는 조사 중이므로 단정하지 않겠으며, 같은 공식 창구를 통해 다음 안내를 드리겠습니다."`],
         ["공격적 질문", `"그 사안은 현재 단계에서 단정할 수 없습니다. 다만 제기하신 우려는 기록했고, 객관 자료와 관계기관 확인을 거쳐 공개 가능한 범위에서 책임 있게 설명하겠습니다."`],
         ["오정보·루머", `"현재 온라인에 확산 중인 내용은 공식 확인된 정보가 아닙니다. 혼선을 줄이기 위해 ${s.org} 공식 채널의 안내를 기준으로 확인해 주시고, 새로 확인되는 내용은 같은 채널에서 업데이트하겠습니다."`]
       ];
+    }
 
+    function collectMessages(s) {
+      const confirmed = s.confirmed.slice(0, 3).join(", ");
+      const next = s.phase === "0-2" ? "30분 이내" : s.phase === "2-6" ? "2시간 이내" : s.phase === "6-24" ? "정해진 브리핑 시각" : "다음 정례 안내 시각";
+      return [
+        ["주민 안전문자", `"${s.incident.name} 관련 안전조치가 진행 중입니다. 확인된 사실: ${confirmed}. 위험구역 접근을 피하고 공식 안내를 따라 주십시오. 다음 안내: ${next}."`],
+        ["내부 공지", `"현재 ${s.incident.name} 상황으로 관련 문의는 지정 창구로 이관합니다. 확인되지 않은 정보의 외부 전달과 SNS 게시를 금지합니다. 변경 사항은 ${next}에 공지합니다."`],
+        ["언론 회신 문자", `"문의 주신 사항은 접수했습니다. ${s.org}는 확인된 사실과 공개 가능한 범위를 정리해 공식 창구로 안내드리겠습니다. 원인·책임·최종 수치는 확인 전 단정하지 않습니다."`]
+      ];
+    }
+
+    function auditInput(s) {
+      const raw = {
+        keywords: $("keywords").value.trim(),
+        confirmed: $("confirmed").value.trim(),
+        unknown: $("unknown").value.trim()
+      };
+      const allText = `${raw.keywords} ${raw.confirmed} ${raw.unknown}`;
+      const findings = [];
+      const hasTime = /\d{1,2}\s*[:시]\s*\d{0,2}/.test(allText);
+      const hasUnknownBoundary = raw.unknown.length > 0 || s.unknown.some(v => /원인|개인정보|수사|조사|피해/.test(v));
+      const riskyWords = ["별일 아닙니다", "문제 없습니다", "확실합니다", "책임이 없습니다", "무조건"];
+      const foundRisk = riskyWords.filter(word => allText.includes(word));
+
+      findings.push({
+        ok: raw.confirmed.length > 0,
+        text: raw.confirmed.length > 0 ? "확인된 사실 입력값이 있어 스크립트에 반영했습니다." : "확인된 사실이 비어 있어 기본 확인 중 문안으로 보수 처리했습니다."
+      });
+      findings.push({
+        ok: hasUnknownBoundary,
+        text: hasUnknownBoundary ? "원인·피해 규모·개인정보 등 보류/비공개 경계를 반영했습니다." : "보류/비공개 항목이 부족합니다. 원인, 최종 피해 규모, 개인정보, 수사 정보를 분리하십시오."
+      });
+      findings.push({
+        ok: hasTime,
+        text: hasTime ? "시각 정보가 포함되어 타임라인 기록에 적합합니다." : "시각 정보가 부족합니다. 최초 인지, 신고, 조치, 안내 예정 시각을 추가하십시오."
+      });
+      findings.push({
+        ok: foundRisk.length === 0,
+        text: foundRisk.length === 0 ? "축소·단정·면책성 표현은 발견되지 않았습니다." : `주의 표현 발견: ${foundRisk.join(", ")}. 공식 문안에서는 제거하십시오.`
+      });
+      findings.push({
+        ok: true,
+        text: `${phaseTitle(s.phase)} 기준으로 다음 안내 시점과 공식 창구 문장을 다시 생성했습니다.`
+      });
+      return findings;
+    }
+
+    function renderAuditPanel(s) {
+      const findings = auditInput(s);
+      $("auditPanel").innerHTML = findings.map((item, index) => `
+        <div class="script-box ${item.ok ? "tone-report" : "tone-victim"}">
+          <div class="caption">${index + 1}. ${item.ok ? "통과" : "보완 필요"}</div>
+          <p>${item.text}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderScripts(s) {
+      const scripts = collectScripts(s);
       const scriptTones = ["tone-report", "tone-victim", "tone-media", "tone-media", "tone-media"];
       $("scripts").innerHTML = scripts.map(([title, body], index) => `
         <div class="script-box ${scriptTones[index] || ""}"><div class="caption">${title}</div><p>${body}</p></div>
       `).join("");
 
       const messageTones = ["tone-report", "tone-report", "tone-media"];
-      $("messages").innerHTML = [
-        ["주민 안전문자", `"${s.incident.name} 관련 안전조치가 진행 중입니다. 확인된 사실: ${confirmed}. 위험구역 접근을 피하고 공식 안내를 따라 주십시오. 다음 안내: ${next}."`],
-        ["내부 공지", `"현재 ${s.incident.name} 상황으로 관련 문의는 지정 창구로 이관합니다. 확인되지 않은 정보의 외부 전달과 SNS 게시를 금지합니다. 변경 사항은 ${next}에 공지합니다."`],
-        ["언론 회신 문자", `"문의 주신 사항은 접수했습니다. ${s.org}는 확인된 사실과 공개 가능한 범위를 정리해 공식 창구로 안내드리겠습니다. 원인·책임·최종 수치는 확인 전 단정하지 않습니다."`]
-      ].map(([title, body], index) => `<div class="script-box ${messageTones[index] || ""}"><div class="caption">${title}</div><p>${body}</p></div>`).join("");
+      $("messages").innerHTML = collectMessages(s).map(([title, body], index) => `<div class="script-box ${messageTones[index] || ""}"><div class="caption">${title}</div><p>${body}</p></div>`).join("");
     }
 
     function renderRange(s) {
@@ -782,6 +902,133 @@
       $("bannedList").innerHTML = banned.map(v => `<li>${v}</li>`).join("");
     }
 
+    function timelineEntries() {
+      try {
+        return JSON.parse(localStorage.getItem("disasterCommTimeline") || "[]");
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveTimeline(entries) {
+      localStorage.setItem("disasterCommTimeline", JSON.stringify(entries.slice(0, 30)));
+    }
+
+    function entryText(entry) {
+      return [
+        `KOREA CONTENTS LAB`,
+        `생성 시각: ${entry.time}`,
+        `대응 기준: ${entry.incident} / ${entry.org} / ${entry.phase}`,
+        `입력 키워드: ${entry.keywords}`,
+        ``,
+        `Ⅰ. 재점검 결과`,
+        ...entry.audit.map((item, i) => `${i + 1}. ${item.ok ? "통과" : "보완 필요"} - ${item.text}`),
+        ``,
+        `Ⅱ. 새 대응 스크립트`,
+        ...entry.scripts.map(([title, body], i) => `${i + 1}. ${title}\n${body}`),
+        ``,
+        `Ⅲ. 새 문자메시지`,
+        ...entry.messages.map(([title, body], i) => `${i + 1}. ${title}\n${body}`)
+      ].join("\n");
+    }
+
+    function renderTimeline() {
+      const entries = timelineEntries();
+      if (!entries.length) {
+        $("timelineList").innerHTML = `<div class="timeline-empty">아직 생성된 답변 변화가 없습니다. "가이드 생성"을 누르면 재점검 결과와 새 스크립트가 이곳에 기록됩니다.</div>`;
+        return;
+      }
+      $("timelineList").innerHTML = entries.map((entry, index) => `
+        <article class="timeline-item" data-entry-id="${entry.id}">
+          <h3>${entries.length - index}. ${entry.incident} · ${entry.phase}</h3>
+          <div class="timeline-meta">${entry.time} · ${entry.org} · ${entry.changeLabel}</div>
+          <div class="timeline-actions">
+            <button data-copy-entry="${entry.id}">복사</button>
+            <button data-send-entry="${entry.id}">전송</button>
+            <button data-print-entry="${entry.id}">출력</button>
+          </div>
+          <pre>${escapeHtml(entryText(entry))}</pre>
+        </article>
+      `).join("");
+    }
+
+    function createTimelineEntry() {
+      const s = state();
+      const audit = auditInput(s);
+      const scripts = collectScripts(s);
+      const messages = collectMessages(s);
+      const entries = timelineEntries();
+      const signature = JSON.stringify({
+        incident: s.incident.name,
+        org: s.org,
+        phase: s.phase,
+        keywords: s.keywords,
+        confirmed: s.confirmed,
+        unknown: s.unknown,
+        scripts,
+        messages
+      });
+      const previous = entries[0];
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        time: nowStamp(),
+        incident: s.incident.name,
+        org: s.org,
+        phase: phaseTitle(s.phase),
+        keywords: s.keywords.join(" / "),
+        audit,
+        scripts,
+        messages,
+        signature,
+        changeLabel: previous && previous.signature === signature ? "이전 생성 대비 변경 없음" : "새 답변 생성"
+      };
+      entries.unshift(entry);
+      saveTimeline(entries);
+      renderTimeline();
+      return entry;
+    }
+
+    async function copyText(text, button) {
+      await navigator.clipboard.writeText(text);
+      if (button) {
+        const original = button.textContent;
+        button.textContent = "복사됨";
+        setTimeout(() => button.textContent = original, 1200);
+      }
+    }
+
+    async function sendText(text) {
+      if (navigator.share) {
+        await navigator.share({ title: "재난안전 커뮤니케이션 대응 타임라인", text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      location.href = `mailto:?subject=${encodeURIComponent("재난안전 커뮤니케이션 대응 타임라인")}&body=${encodeURIComponent(text)}`;
+    }
+
+    function printText(text) {
+      const win = window.open("", "_blank");
+      if (!win) {
+        window.print();
+        return;
+      }
+      win.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>대응 타임라인</title><style>body{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65;padding:24px;color:#111827}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><pre>${escapeHtml(text)}</pre></body></html>`);
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    function timelineTextAll() {
+      const entries = timelineEntries();
+      return entries.length ? entries.map(entryText).join("\n\n------------------------------\n\n") : "생성된 타임라인 기록이 없습니다.";
+    }
+
+    function showView(view) {
+      document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === view)));
+      ["guide", "range", "sources", "timeline"].forEach(v => $(`${v}View`).classList.toggle("hidden", v !== view));
+      if (view === "timeline") renderTimeline();
+    }
+
     function render() {
       $("inputTime").textContent = nowStamp();
       const s = state();
@@ -790,11 +1037,13 @@
       $("riskLabel").textContent = s.phase === "0-2" ? "초동 확인" : s.phase === "2-6" ? "공식 창구" : s.phase === "6-24" ? "일관 배포" : "복구·학습";
       renderPhases(s);
       renderChecklist(s);
+      renderAuditPanel(s);
       renderScripts(s);
       renderRange(s);
       renderSources();
       renderQuick();
       renderBanned();
+      renderTimeline();
       localStorage.setItem("disasterCommState", JSON.stringify({
         incidentType: $("incidentType").value,
         orgType: $("orgType").value,
@@ -818,10 +1067,7 @@
 
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", "false"));
-        tab.setAttribute("aria-selected", "true");
-        ["guide", "range", "sources"].forEach(v => $(`${v}View`).classList.add("hidden"));
-        $(`${tab.dataset.view}View`).classList.remove("hidden");
+        showView(tab.dataset.view);
       });
     });
 
@@ -829,7 +1075,12 @@
       $(id).addEventListener("input", render);
       $(id).addEventListener("change", render);
     });
-    $("renderBtn").addEventListener("click", render);
+    $("renderBtn").addEventListener("click", () => {
+      render();
+      createTimelineEntry();
+      showView("timeline");
+      $("resultPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     $("sampleBtn").addEventListener("click", () => {
       $("incidentType").value = "fire";
       $("orgType").value = "local";
@@ -845,15 +1096,32 @@
     });
     $("copyBtn").addEventListener("click", async () => {
       const text = document.querySelector(".output").innerText;
-      await navigator.clipboard.writeText(text);
-      $("copyBtn").textContent = "복사됨";
-      setTimeout(() => $("copyBtn").textContent = "복사", 1200);
+      await copyText(text, $("copyBtn"));
     });
     $("printBtn").addEventListener("click", () => window.print());
     $("saveBtn").addEventListener("click", () => {
       render();
       $("saveBtn").textContent = "저장됨";
       setTimeout(() => $("saveBtn").textContent = "로컬 저장", 1200);
+    });
+    $("copyTimelineBtn").addEventListener("click", async () => copyText(timelineTextAll(), $("copyTimelineBtn")));
+    $("sendTimelineBtn").addEventListener("click", async () => sendText(timelineTextAll()));
+    $("printTimelineBtn").addEventListener("click", () => printText(timelineTextAll()));
+    $("clearTimelineBtn").addEventListener("click", () => {
+      localStorage.removeItem("disasterCommTimeline");
+      renderTimeline();
+    });
+    $("timelineList").addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const entries = timelineEntries();
+      const id = button.dataset.copyEntry || button.dataset.sendEntry || button.dataset.printEntry;
+      const entry = entries.find(item => item.id === id);
+      if (!entry) return;
+      const text = entryText(entry);
+      if (button.dataset.copyEntry) await copyText(text, button);
+      if (button.dataset.sendEntry) await sendText(text);
+      if (button.dataset.printEntry) printText(text);
     });
     $("shareUrlBtn").addEventListener("click", async () => {
       await navigator.clipboard.writeText(location.href);
