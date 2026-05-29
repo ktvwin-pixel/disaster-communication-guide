@@ -1,10 +1,9 @@
-const CACHE_NAME = "disaster-comm-guide-v5";
+const CACHE_NAME = "disaster-comm-guide-v6";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icon.svg",
-  "./logo.svg"
+  "./logo-white.png"
 ];
 
 self.addEventListener("install", event => {

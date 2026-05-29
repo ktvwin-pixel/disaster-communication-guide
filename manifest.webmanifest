@@ -9,10 +9,10 @@
   "description": "재난안전 대응 과정에서 확인 사실 중심의 커뮤니케이션 체크리스트, 스크립트, 문자메시지, 공개범위를 제공하는 웹 앱입니다.",
   "icons": [
     {
-      "src": "logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "logo-white.png",
+      "sizes": "266x131",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
