@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
   const rel = url.pathname === "/" ? "index.html" : decodeURIComponent(url.pathname.slice(1));
   const file = path.resolve(root, rel);
 
-  if (!file.startsWith(root)) {
+  if (file !== root && !file.startsWith(root + path.sep)) {
     res.writeHead(403);
     res.end("Forbidden");
     return;
@@ -40,7 +40,9 @@ const server = http.createServer((req, res) => {
 
 server.listen(port, host, () => {
   const urls = [`http://127.0.0.1:${port}`];
-  for (const net of Object.values(os.networkInterfaces())) {
+  let interfaces = {};
+  try { interfaces = os.networkInterfaces(); } catch (_) {}
+  for (const net of Object.values(interfaces)) {
     for (const item of net || []) {
       if (item.family === "IPv4" && !item.internal) urls.push(`http://${item.address}:${port}`);
     }
@@ -48,3 +50,4 @@ server.listen(port, host, () => {
   console.log("재난안전 커뮤니케이션 전략 가이드");
   console.log(urls.join("\n"));
 });
+

@@ -1,0 +1,12 @@
+{
+  "name": "disaster-communication-guide",
+  "version": "2.0.0",
+  "private": true,
+  "description": "KCL deterministic disaster communication guide",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/engine.test.cjs && node tests/dom.test.cjs",
+    "check": "node --check app.js && node --check engine.js && node --check content.js && node --check sw.js"
+  },
+  "devDependencies": {"jsdom": "26.1.0"}
+}
